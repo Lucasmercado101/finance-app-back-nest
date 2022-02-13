@@ -20,16 +20,16 @@ export class CategoriesService {
     return this.categoryRepository.find();
   }
 
-  findOne(id: number) {
-    return this.categoryRepository.findOne(id);
+  findOne(name: string) {
+    return this.categoryRepository.findOne(name);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryRepository.update(id, updateCategoryDto);
+  update(name: string, updateCategoryDto: UpdateCategoryDto) {
+    return this.categoryRepository.update(name, updateCategoryDto);
   }
 
-  remove(id: number) {
-    return this.remove(id);
+  remove(name: string) {
+    return this.remove(name);
   }
 
   categoryExists(name: string): Promise<boolean> {
