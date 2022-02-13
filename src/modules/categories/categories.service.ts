@@ -31,4 +31,8 @@ export class CategoriesService {
   remove(id: number) {
     return this.remove(id);
   }
+
+  categoryExists(name: string): Promise<boolean> {
+    return this.categoryRepository.count({ name }).then((count) => count > 0);
+  }
 }
