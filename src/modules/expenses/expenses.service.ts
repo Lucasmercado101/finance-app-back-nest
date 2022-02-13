@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CategoriesService } from '../categories/categories.service';
 import { CurrenciesService } from '../currencies/currencies.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { ResponseExpenseDto } from './dto/response-expense.dto';
@@ -18,13 +19,13 @@ export class ExpensesService {
     @InjectRepository(Expense)
     private readonly expenseRepository: Repository<Expense>,
     private readonly currencyService: CurrenciesService,
+    private readonly categoryService: CategoriesService,
   ) {}
 
   public async create(
     createExpenseDto: CreateExpenseDto,
   ): Promise<ResponseExpenseDto> {
     const expense = this.expenseRepository.create({
-      category: createExpenseDto.category,
       comment: createExpenseDto.comment,
       created_at: createExpenseDto.created_at,
       amount: createExpenseDto.amount,
@@ -37,10 +38,27 @@ export class ExpensesService {
         `Currency ${createExpenseDto.currency} does not exist`,
       );
     }
+
+    if (createExpenseDto.category) {
+      if (
+        !(await this.categoryService.categoryExists(createExpenseDto.category))
+      ) {
+        throw new BadRequestException(
+          `Category ${createExpenseDto.category} does not exist`,
+        );
+      }
+    }
+
     const currency = await this.currencyService.findOne(
       createExpenseDto.currency,
     );
+
+    const category = await this.categoryService.findOne(
+      createExpenseDto.category,
+    );
+
     expense.currency = currency;
+    expense.category = category;
     return this.expenseRepository.save(expense).then(this.toResponseDTO);
   }
 
@@ -75,10 +93,11 @@ export class ExpensesService {
 
   private toResponseDTO(expense: Expense): ResponseExpenseDto {
     const currencyName = expense.currency.name;
-    delete expense.currency;
+    const CategoryName = expense.category ? expense.category.name : null;
     const currencyResponse: ResponseExpenseDto = {
       ...expense,
       currency: currencyName,
+      category: CategoryName,
     };
     return currencyResponse;
   }

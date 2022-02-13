@@ -10,7 +10,8 @@ export class CreateExpenseDto {
   readonly amount!: number;
 
   @IsString()
-  readonly category!: string;
+  @IsOptional()
+  readonly category?: string;
 
   @IsString()
   @IsOptional()

@@ -4,6 +4,6 @@ export class ResponseExpenseDto {
   created_at: Date;
   updated_at: Date;
   amount: number;
-  category: string;
+  category?: string;
   comment: string;
 }
