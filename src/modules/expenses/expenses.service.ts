@@ -70,7 +70,14 @@ export class ExpensesService {
   }
 
   findOne(id: number) {
-    return this.expenseRepository.findOne(id, { relations: ['currency'] });
+    return this.expenseRepository
+      .findOne(id, { relations: ['currency'] })
+      .then((expense) => {
+        if (!expense) {
+          throw new NotFoundException(`Expense with id ${id} not found`);
+        }
+        return this.toResponseDTO(expense);
+      });
   }
 
   public async updateOne(id: number, updateExpenseDto: UpdateExpenseDto) {
