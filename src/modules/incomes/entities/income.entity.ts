@@ -1,3 +1,4 @@
+import { Category } from 'src/modules/categories/entities/category.entity';
 import { Currency } from 'src/modules/currencies/entities/currency.entity';
 import {
   Column,
@@ -22,12 +23,12 @@ export class Income {
   @Column()
   amount!: number;
 
-  @Column({ default: 'other' })
-  category!: string;
-
   @Column({ nullable: true })
   comment: string;
 
   @ManyToOne(() => Currency)
   currency!: Currency;
+
+  @ManyToOne(() => Category, { nullable: true })
+  category?: Category;
 }

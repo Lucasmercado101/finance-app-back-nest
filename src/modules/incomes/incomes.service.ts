@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CategoriesService } from '../categories/categories.service';
 import { CurrenciesService } from '../currencies/currencies.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { ResponseIncomeDto } from './dto/response-income.dto';
@@ -17,13 +18,13 @@ export class IncomesService {
     @InjectRepository(Income)
     private readonly incomeRepository: Repository<Income>,
     private readonly currencyService: CurrenciesService,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   public async create(
     createIncomeDto: CreateIncomeDto,
   ): Promise<ResponseIncomeDto> {
     const income = this.incomeRepository.create({
-      category: createIncomeDto.category,
       comment: createIncomeDto.comment,
       created_at: createIncomeDto.created_at,
       amount: createIncomeDto.amount,
@@ -37,11 +38,26 @@ export class IncomesService {
       );
     }
 
+    if (createIncomeDto.category) {
+      if (
+        !(await this.categoriesService.categoryExists(createIncomeDto.category))
+      ) {
+        throw new BadRequestException(
+          `Category ${createIncomeDto.category} does not exist`,
+        );
+      }
+    }
+
     const currency = await this.currencyService.findOne(
       createIncomeDto.currency,
     );
 
+    const category = await this.categoriesService.findOne(
+      createIncomeDto.category,
+    );
+
     income.currency = currency;
+    income.category = category;
     return this.incomeRepository.save(income).then(this.toResponseDTO);
   }
 
@@ -80,10 +96,11 @@ export class IncomesService {
 
   private toResponseDTO(expense: Income): ResponseIncomeDto {
     const currencyName = expense.currency.name;
-    delete expense.currency;
+    const categoryName = expense.category ? expense.category.name : null;
     const currencyResponse: ResponseIncomeDto = {
       ...expense,
       currency: currencyName,
+      category: categoryName,
     };
     return currencyResponse;
   }
