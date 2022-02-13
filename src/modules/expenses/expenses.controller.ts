@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
@@ -32,16 +33,16 @@ export class ExpensesController {
 
   @Get('total')
   public async getTotal(
-    @Body() getTotalExpensesDto: BetweenDatesDto,
+    @Query() queryParams: BetweenDatesDto,
   ): Promise<{ amount: number; currency: string }[]> {
-    return this.expensesService.getTotal(getTotalExpensesDto);
+    return this.expensesService.getTotal(queryParams);
   }
 
   @Get('between')
   public async getBetween(
-    @Body() getTotalExpensesDto: BetweenDatesDto,
+    @Query() queryParams: BetweenDatesDto,
   ): Promise<ResponseExpenseDto[]> {
-    return this.expensesService.getBetween(getTotalExpensesDto);
+    return this.expensesService.getBetween(queryParams);
   }
 
   @Get(':id')
