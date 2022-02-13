@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsDate } from 'class-validator';
 
-export class GetTotalExpensesDto {
+export class BetweenDatesDto {
   @Type(() => Date)
   @IsDate()
   readonly from!: Date;
