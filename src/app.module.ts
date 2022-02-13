@@ -12,6 +12,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
       database: ':memory:',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+      logging: true,
     }),
     ExpensesModule,
     IncomesModule,
