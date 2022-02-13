@@ -12,7 +12,7 @@ import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { ResponseExpenseDto } from './dto/response-expense.dto';
-import { GetTotalExpensesDto } from './dto/get-total-expenses.dto';
+import { BetweenDatesDto } from './dto/between-dates.dto';
 
 @Controller('expense')
 export class ExpensesController {
@@ -32,9 +32,16 @@ export class ExpensesController {
 
   @Get('total')
   public async getTotal(
-    @Body() getTotalExpensesDto: GetTotalExpensesDto,
+    @Body() getTotalExpensesDto: BetweenDatesDto,
   ): Promise<{ amount: number; currency: string }[]> {
     return this.expensesService.getTotal(getTotalExpensesDto);
+  }
+
+  @Get('between')
+  public async getBetween(
+    @Body() getTotalExpensesDto: BetweenDatesDto,
+  ): Promise<ResponseExpenseDto[]> {
+    return this.expensesService.getBetween(getTotalExpensesDto);
   }
 
   @Get(':id')

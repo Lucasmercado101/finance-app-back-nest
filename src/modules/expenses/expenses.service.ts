@@ -3,15 +3,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
-import { Connection, MoreThan, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CategoriesService } from '../categories/categories.service';
 import { CurrenciesService } from '../currencies/currencies.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
-import { GetTotalExpensesDto } from './dto/get-total-expenses.dto';
+import { BetweenDatesDto } from './dto/between-dates.dto';
 import { ResponseExpenseDto } from './dto/response-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './entities/expense.entity';
+import { Currency } from '../currencies/entities/currency.entity';
 
 @Injectable()
 export class ExpensesService {
@@ -99,18 +100,33 @@ export class ExpensesService {
   }
 
   public async getTotal(
-    getTotalExpensesDto: GetTotalExpensesDto,
+    between: BetweenDatesDto,
   ): Promise<{ amount: number; currency: string }[]> {
     return this.expenseRepository
       .createQueryBuilder('expense')
       .select('SUM(expense.amount)', 'amount')
       .addSelect('expense.currency', 'currency')
       .where('expense.created_at BETWEEN :from AND :to', {
-        from: getTotalExpensesDto.from.toISOString(),
-        to: getTotalExpensesDto.to.toISOString(),
+        from: between.from.toISOString(),
+        to: between.to.toISOString(),
       })
       .groupBy('expense.currency')
       .getRawMany();
+  }
+
+  public async getBetween(
+    between: BetweenDatesDto,
+  ): Promise<ResponseExpenseDto[]> {
+    return this.expenseRepository
+      .createQueryBuilder('expense')
+      .where('expense.created_at BETWEEN :from AND :to', {
+        from: between.from.toISOString(),
+        to: between.to.toISOString(),
+      })
+      .leftJoinAndSelect('expense.currency', 'currency')
+      .where('currency.name = expense.currency')
+      .getMany()
+      .then((expenses) => expenses.map(this.toResponseDTO));
   }
 
   private toResponseDTO(expense: Expense): ResponseExpenseDto {
