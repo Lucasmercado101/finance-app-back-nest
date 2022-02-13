@@ -12,6 +12,7 @@ import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { ResponseExpenseDto } from './dto/response-expense.dto';
+import { GetTotalExpensesDto } from './dto/get-total-expenses.dto';
 
 @Controller('expense')
 export class ExpensesController {
@@ -27,6 +28,13 @@ export class ExpensesController {
   @Get()
   public async findAll(): Promise<ResponseExpenseDto[]> {
     return this.expensesService.findAll();
+  }
+
+  @Get('total')
+  public async getTotal(
+    @Body() getTotalExpensesDto: GetTotalExpensesDto,
+  ): Promise<{ amount: number; currency: string }[]> {
+    return this.expensesService.getTotal(getTotalExpensesDto);
   }
 
   @Get(':id')

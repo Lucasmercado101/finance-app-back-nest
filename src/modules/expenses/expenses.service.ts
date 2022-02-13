@@ -3,11 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
+import { Connection, MoreThan, Repository } from 'typeorm';
 import { CategoriesService } from '../categories/categories.service';
 import { CurrenciesService } from '../currencies/currencies.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
+import { GetTotalExpensesDto } from './dto/get-total-expenses.dto';
 import { ResponseExpenseDto } from './dto/response-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { Expense } from './entities/expense.entity';
@@ -95,6 +96,21 @@ export class ExpensesService {
 
   remove(id: number) {
     return this.expenseRepository.delete(id);
+  }
+
+  public async getTotal(
+    getTotalExpensesDto: GetTotalExpensesDto,
+  ): Promise<{ amount: number; currency: string }[]> {
+    return this.expenseRepository
+      .createQueryBuilder('expense')
+      .select('SUM(expense.amount)', 'amount')
+      .addSelect('expense.currency', 'currency')
+      .where('expense.created_at BETWEEN :from AND :to', {
+        from: getTotalExpensesDto.from.toISOString(),
+        to: getTotalExpensesDto.to.toISOString(),
+      })
+      .groupBy('expense.currency')
+      .getRawMany();
   }
 
   private toResponseDTO(expense: Expense): ResponseExpenseDto {
