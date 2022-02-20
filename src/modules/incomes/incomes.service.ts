@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CategoriesService } from '../categories/categories.service';
 import { CurrenciesService } from '../currencies/currencies.service';
+import { BetweenDatesDto } from '../expenses/dto/between-dates.dto';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { ResponseIncomeDto } from './dto/response-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
@@ -92,6 +93,21 @@ export class IncomesService {
 
   remove(id: number) {
     return this.incomeRepository.delete(id);
+  }
+
+  public async getBetween(
+    between: BetweenDatesDto,
+  ): Promise<ResponseIncomeDto[]> {
+    return this.incomeRepository
+      .createQueryBuilder('income')
+      .where('income.created_at BETWEEN :from AND :to', {
+        from: between.from.toISOString(),
+        to: between.to.toISOString(),
+      })
+      .leftJoinAndSelect('income.currency', 'currency')
+      .where('currency.name = income.currency')
+      .getMany()
+      .then((incomes) => incomes.map(this.toResponseDTO));
   }
 
   private toResponseDTO(expense: Income): ResponseIncomeDto {

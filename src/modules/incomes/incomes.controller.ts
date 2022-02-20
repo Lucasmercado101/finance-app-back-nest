@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { IncomesService } from './incomes.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { ResponseIncomeDto } from './dto/response-income.dto';
+import { BetweenDatesDto } from '../expenses/dto/between-dates.dto';
 
 @Controller('income')
 export class IncomesController {
@@ -24,6 +26,13 @@ export class IncomesController {
   @Get()
   findAll() {
     return this.incomesService.findAll();
+  }
+
+  @Get('between')
+  public async getBetween(
+    @Query() queryParams: BetweenDatesDto,
+  ): Promise<ResponseIncomeDto[]> {
+    return this.incomesService.getBetween(queryParams);
   }
 
   @Get(':id')

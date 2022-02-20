@@ -4,6 +4,6 @@ export class ResponseIncomeDto {
   created_at: Date;
   updated_at: Date;
   amount: number;
-  category: string;
-  comment: string;
+  category?: string;
+  comment?: string;
 }
